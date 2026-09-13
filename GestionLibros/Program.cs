@@ -1,5 +1,6 @@
 using GestionLibros.Components;
 using GestionLibros.DAL;
+using GestionLibros.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +12,9 @@ builder.Services.AddRazorComponents()
 // Contexto
 var ConStr = builder.Configuration.GetConnectionString("ConStr");
 builder.Services.AddDbContextFactory<Contexto>(o =>o.UseSqlite(ConStr));
+
+//Service 
+builder.Services.AddScoped<LibrosService>();
 
 var app = builder.Build();
 
