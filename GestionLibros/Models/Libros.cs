@@ -2,7 +2,6 @@
 
 namespace GestionLibros.Models;
 
-
 public class Libros
 {
     [Key]
