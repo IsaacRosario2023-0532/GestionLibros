@@ -1,68 +1,76 @@
 ﻿@page "/Libros/Create"
 @inject LibrosService librosService
-@inject NavigationManager navigationManager
+@inject NavigationManager navigation
 @rendermode InteractiveServer
 
-<PageTitle> Create </PageTitle>
+@attribute [Authorize]
+
+<PageTitle> Create Libros </PageTitle>
 
 <div class="container mt-3">
-	<div class="card shadow-lg">
-		<div class="card-header">
-			<h5 class="card-title text-center"> <strong> Crear Libro </strong> </h5>
-		</div>
+    <div class="card shadow-lg">
+        <div class="card-header">
+            <h5 class="card-title text-center"> <strong> Crear Libro </strong></h5>
+        </div>
 
-		<div class="card-body">
-			<EditForm Model="Libro" OnValidSubmit="GuardarLibro">
-				<DataAnnotationsValidator />
+        <EditForm Model="Libro" OnValidSubmit="GuardarLibro">
+            <DataAnnotationsValidator />
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12 col-md-6 mb-3">
+                        <label class="col-form-label"> <strong> Libro Id </strong> </label>
+                        <InputNumber class="form-control" @bind-Value="Libro.LibroId" disabled />
+                    </div>
+                </div>
 
-				<div class="row">
-					<div class="col-12 col-md-3 mb-3">
-						<label class="col-form-label"> <strong> Libro Id: </strong></label>
-						<InputNumber class="form-control" @bind-Value="Libro.LibroId" disabled />
-					</div>
-				</div>
+                <div class="row">
+                    <div class="col-12 col-md-6 mb-3">
+                        <label class="col-form-label"> <strong> Título </strong> </label>
+                        <InputText class="form-control" @bind-Value="Libro.Titulo" />
+                        <ValidationMessage For="() => Libro.Titulo" />
+                    </div>
+                </div>
 
-				<div class="row">
-					<div class="col-12 col-md-3 mb-3">
-						<label class="col-form-label"> <strong> Título: </strong></label>
-						<InputText class="form-control" @bind-Value="Libro.Titulo" />
-						<ValidationMessage For="() => Libro.Titulo"> </ValidationMessage>
-					</div>
-				</div>
+                @if (!string.IsNullOrEmpty(MensajeError))
+                {
+                    <div class="text-danger"> @MensajeError </div>
+                }
 
-				<div class="row">
-					<div class="col-12 col-md-3 mb-3">
-						<label class="col-form-label"> <strong> Autor: </strong></label>
-						<InputText class="form-control" @bind-Value="Libro.Autor" />
-						<ValidationMessage For="() => Libro.Autor"> </ValidationMessage>
-					</div>
-				</div>
+                <div class="row">
+                    <div class="col-12 col-md-6 mb-3">
+                        <label class="col-form-label"> <strong> Autor </strong> </label>
+                        <InputText class="form-control" @bind-Value="Libro.Autor" />
+                        <ValidationMessage For="() => Libro.Autor" />
+                    </div>
+                </div>
 
-				<div class="row">
-					<div class="col-12 col-md-3 mb-3">
-						<label class="col-form-label"> <strong> Año de Publicación: </strong></label>
-						<InputNumber class="form-control" @bind-Value="Libro.AnoPublicacion" />
-						<ValidationMessage For="() => Libro.AnoPublicacion"> </ValidationMessage>
-					</div>
-				</div>
+                <div class="row">
+                    <div class="col-12 col-md-6 mb-3">
+                        <label class="col-form-label"> <strong> Año de Publicación </strong> </label>
+                        <InputNumber class="form-control" @bind-Value="Libro.AnoPublicacion" />
+                        <ValidationMessage For="() => Libro.AnoPublicacion" />
+                    </div>
+                </div>
+            </div>
 
-				<div class="card-footer d-flex justify-content-center gap-2 bg-white">
-					<button type="submit" class="btn btn-primary bi bi-floppy"> Guardar </button>
-					<a href="/Libros/Index" class="btn btn-secondary bi bi-arrow-left"> Regresar </a>
-				</div>
-			</EditForm>
-		</div>
-	</div>
+            <div class="card-footer d-flex justify-content-center gap-2">
+                <button type="submit" class="btn btn-primary bi bi-floppy"> Guardar </button>
+                <a class="btn btn-secondary bi bi-arrow-left" href="/Libros/Index"> Regresar </a>
+            </div>
+        </EditForm>
+    </div>
 </div>
 
 @code {
-	public Libros Libro = new Libros();
+    public Libros Libro { get; set; } = new();
 
-	public async Task GuardarLibro()
-	{
-		if (await librosService.Guardar(Libro))
-		{
-			navigationManager.NavigateTo("/Libros/Index");
-		}
-	}
+    private string MensajeError { get; set; } = string.Empty;
+
+    public async Task GuardarLibro()
+    {
+        if (await librosService.Guardar(Libro))
+        {
+            navigation.NavigateTo("/Libros/Index");
+        }
+    }
 }

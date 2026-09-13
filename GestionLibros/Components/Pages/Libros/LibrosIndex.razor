@@ -1,124 +1,129 @@
 ﻿@page "/Libros/Index"
 @inject LibrosService librosService
-@inject NavigationManager navigationManager
 @rendermode InteractiveServer
 
-<PageTitle> Index </PageTitle>
+<PageTitle> Index Libros </PageTitle>
 
-<div class="container mt-2">
-	<div class="card shadow-lg">
-		<div class="card-header">
-			<h5 class="card-title text-center"><strong> Consulta Libros </strong></h5>
+<div class="container mt-3">
+    <div class="card shadow-lg">
+        <div class="card-header">
+            <h5 class="card-title text-center"> <strong> Consulta Libros </strong></h5>
 
-			<div class="d-flex justify-content-end">
-				<a href="/Libros/Create" class="btn btn-primary bi bi-plus-square"> Crear </a>
-			</div>
-		</div>
+            <div class="d-flex justify-content-end">
+                <a class="btn btn-primary bi bi-plus-square" href="/Libros/Create"> Crear libro </a>
+            </div>
+        </div>
 
-		<div class="card-body">
-			<div class="row align-items-center">
-				<div class="col-12 col-md-3 mb-3">
-					<label class="col-form-label"> <strong> Filtrar por: </strong></label>
-					<InputSelect class="form-select" @bind-Value="filtro"> 
-						<option value="" selected disabled> Elija una opcion </option>
-						<option value="LibroId"> Libro Id </option>
-						<option value="Titulo"> Título </option>
-						<option value="Autor"> Autor </option>
-						<option value="AnoPublicacion"> Año de Publicación </option>
-					</InputSelect>
-				</div>
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-12 col-md-5 mb-3">
+                    <label class="col-form-label"> <strong> Filtrar por </strong></label>
+                    <InputSelect class="form-select" @bind-Value="Filtro">
+                        <option value="" disabled selected> Seleccione una opcion </option>
+                        <option value="LibroId"> Libro Id </option>
+                        <option value="Titulo"> Título </option>
+                        <option value="Autor"> Autor </option>
+                        <option value="AnoPublicacion"> Año de Publicación </option>
+                    </InputSelect>
+                </div>
 
-				<div class="col-12 col-md-3 mb-3">
-					<label class="col-form-label"> <strong> Busqueda: </strong></label>
-					<div class="input-group">
-						<input class="form-control" @bind="valorFiltro" placeholder="Buscar" />
-						<button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"> Buscar </button>
-					</div>
-				</div>
-			</div>
+                <div class="col-12 col-md-5 mb-3">
+                    <label class="col-form-label"> <strong> Busqueda </strong></label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" @bind="ValorFiltro" placeholder="Buscar" />
+                        <button type="button" class="btn btn-outline-info bi bi-search" @onclick="Buscar"> </button>
+                        <button type="button" class="btn btn-outline-secondary bi bi-arrow-clockwise" @onclick="Restablecer"> </button>
+                    </div>
+                </div>
+            </div>
 
-			<div class="table-responsive">
-				<table class="table table-hover text-center">
-					<thead class="table table-striped">
-						<tr> 
-							<th> Libro Id </th>
-							<th> Título </th>
-							<th> Autor </th>
-							<th> Año de Publicación </th>
-							<th> Opciones </th>
-						</tr>
-					</thead>
+            <div class="table-responsive">
+                <table class="table table-hover text-center">
+                    <thead class="table table-striped">
+                        <tr>
+                            <th> Libro Id </th>
+                            <th> Título </th>
+                            <th> Autor </th>
+                            <th> Año de Publicación </th>
+                            <th> Opciones </th>
+                        </tr>
+                    </thead>
 
-					<tbody>
-						@if(ListaLibros.Count == 0)
-						{
-							<tr>
-								<td colspan="5"> No se han encontrado libros </td>
-							</tr>
-						}
+                    <tbody>
+                        @if (ListaLibros.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center"> No se han encontrado libros </td>
+                            </tr>
+                        }
 
-						@foreach(var libro in ListaLibros)
-						{
-							<tr>
-								<td> @libro.LibroId </td>
-								<td> @libro.Titulo </td>
-								<td> @libro.Autor </td>
-								<td> @libro.AnoPublicacion </td>
-								<td> 
-									<a href="/Libros/Edit/@libro.LibroId" class="btn btn-outline-info bi bi-pencil-square"> </a>
-								</td>
-							</tr>
-						}
-					</tbody>
-				</table>
-			</div>
-		</div>
+                        @foreach (var libro in ListaLibros)
+                        {
+                            <tr>
+                                <td> @libro.LibroId </td>
+                                <td> @libro.Titulo </td>
+                                <td> @libro.Autor </td>
+                                <td> @libro.AnoPublicacion </td>
+                                <td> <a class="btn btn-sm btn-outline-info bi bi-pencil" href="/Libros/Edit/@libro.LibroId" /> </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-		<div class="card-footer d-flex justify-content-center bg-white">
-			<label> <strong> Total libros: </strong> @ListaLibros.Count </label>
-		</div>
-	</div>
+        <div class="card-footer">
+            <label class="col-form-label"> <strong> Total libros: </strong> @ListaLibros.Count </label>
+        </div>
+    </div>
 </div>
 
 @code {
-	public string filtro { get; set; } = null!;
+    public string Filtro { get; set; } = string.Empty;
 
-	public string valorFiltro { get; set; } = string.Empty;
+    public string ValorFiltro { get; set; } = string.Empty;
 
-	public List<Libros> ListaLibros = new List<Libros>();
+    public List<Libros> ListaLibros = new List<Libros>();
 
-	protected override async Task OnInitializedAsync()
-	{
-		await Buscar();
-	}
+    protected override async Task OnInitializedAsync()
+    {
+        await Buscar();
+    }
 
-	public async Task Buscar()
-	{
-		var lista = await librosService.Listar(e => true);
+    public async Task Buscar()
+    {
+        var lista = await librosService.Listar(e => true);
 
-		if (!string.IsNullOrEmpty(valorFiltro))
-		{
-			if (filtro == nameof(Libros.LibroId) && int.TryParse(valorFiltro, out int id))
-			{
-				lista = lista.Where(a => a.LibroId == id).ToList();
-			}
+        if (!string.IsNullOrEmpty(ValorFiltro))
+        {
+            if (Filtro == nameof(Libros.LibroId) && int.TryParse(ValorFiltro, out int id))
+            {
+                lista = lista.Where(l => l.LibroId == id).ToList();
+            }
 
-			else if (filtro == nameof(Libros.Titulo))
-			{
-				lista = lista.Where(a => a.Titulo != null && a.Titulo.Contains(valorFiltro, StringComparison.OrdinalIgnoreCase)).ToList();
-			}
+            else if (Filtro == nameof(Libros.Titulo))
+            {
+                lista = lista.Where(l => l.Titulo.Contains(ValorFiltro, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
 
-			else if (filtro == nameof(Libros.Autor))
-			{
-				lista = lista.Where(a => a.Autor != null && a.Autor.Contains(valorFiltro, StringComparison.OrdinalIgnoreCase)).ToList();
-			}
+            else if (Filtro == nameof(Libros.Autor))
+            {
+                lista = lista.Where(l => l.Autor.Contains(ValorFiltro, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
 
-			else if (filtro == nameof(Libros.AnoPublicacion) && int.TryParse(valorFiltro, out int anio))
-			{
-				lista = lista.Where(a => a.AnoPublicacion == anio).ToList();
-			}
-		}
+            else if (Filtro == nameof(Libros.AnoPublicacion) && int.TryParse(ValorFiltro, out int anio))
+            {
+                lista = lista.Where(l => l.AnoPublicacion == anio).ToList();
+            }
+        }
 
-		ListaLibros = lista;
-	}
+        ListaLibros = lista;
+    }
+
+    private async Task Restablecer()
+    {
+        ListaLibros = await librosService.Listar(e => true);
+        Filtro = string.Empty;
+        ValorFiltro = string.Empty;
+    }
 }

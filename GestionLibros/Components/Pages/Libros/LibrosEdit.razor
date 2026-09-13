@@ -1,128 +1,119 @@
 ﻿@page "/Libros/Edit/{LibroId:int}"
 @inject LibrosService librosService
-@inject NavigationManager navigationManager
+@inject NavigationManager navigation
 @rendermode InteractiveServer
 
-<PageTitle> Edit </PageTitle>
+<PageTitle> Edit Libros </PageTitle>
 
-@if(Libro != null)
+<div class="container mt-3">
+    <div class="card shadow-lg">
+        <div class="card-header">
+            <h5 class="card-title text-center"> <strong> Editar Libro </strong></h5>
+        </div>
+
+        <EditForm Model="Libro" OnValidSubmit="GuardarLibro">
+            <DataAnnotationsValidator />
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12 col-md-6 mb-3">
+                        <label class="col-form-label"> <strong> Libro Id </strong> </label>
+                        <InputNumber class="form-control" @bind-Value="Libro.LibroId" disabled />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-md-6 mb-3">
+                        <label class="col-form-label"> <strong> Título </strong> </label>
+                        <InputText class="form-control" @bind-Value="Libro.Titulo" />
+                        <ValidationMessage For="() => Libro.Titulo" />
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(MensajeError))
+                {
+                    <div class="text-danger"> @MensajeError </div>
+                }
+
+                <div class="row">
+                    <div class="col-12 col-md-6 mb-3">
+                        <label class="col-form-label"> <strong> Autor </strong> </label>
+                        <InputText class="form-control" @bind-Value="Libro.Autor" />
+                        <ValidationMessage For="() => Libro.Autor" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-md-6 mb-3">
+                        <label class="col-form-label"> <strong> Año de Publicación </strong> </label>
+                        <InputNumber class="form-control" @bind-Value="Libro.AnoPublicacion" />
+                        <ValidationMessage For="() => Libro.AnoPublicacion" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer d-flex justify-content-center gap-2">
+                <button type="submit" class="btn btn-primary bi bi-floppy"> Guardar </button>
+                <button type="button" class="btn btn-danger bi bi-trash" @onclick="() => MostrarModal = true"> Eliminar </button>
+                <a class="btn btn-secondary bi bi-arrow-left" href="/Libros/Index"> Regresar </a>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@if (MostrarModal)
 {
-	<div class="container mt-3">
-		<div class="card shadow-lg">
-			<div class="card-header">
-				<h5 class="card-title text-center"> <strong> Editar Libro </strong> </h5>
-			</div>
+    <div class="modal d-block" role="dialog" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title mx-auto"> <strong> Eliminar libro </strong> </h5>
+                </div>
 
-			<div class="card-body">
-				<EditForm Model="Libro" OnValidSubmit="GuardarLibro">
-					<DataAnnotationsValidator />
+                <div class="modal-body">
+                    <label class="col-12"> <strong> Libro Id: </strong> @Libro.LibroId</label>
+                    <label class="col-12"> <strong> Título: </strong> @Libro.Titulo</label>
+                    <label class="col-12"> <strong> Autor: </strong> @Libro.Autor</label>
+                    <label class="col-12"> <strong> Año de Publicación: </strong> @Libro.AnoPublicacion</label>
+                    <label class="text-danger"> Esta seguro que desea eliminar este libro? </label>
+                </div>
 
-					<div class="row">
-						<div class="col-12 col-md-3 mb-3">
-							<label class="col-form-label"> <strong> Libro Id: </strong></label>
-							<InputNumber class="form-control" @bind-Value="Libro.LibroId" disabled />
-						</div>
-					</div>
-
-					<div class="row">
-						<div class="col-12 col-md-3 mb-3">
-							<label class="col-form-label"> <strong> Título: </strong></label>
-							<InputText class="form-control" @bind-Value="Libro.Titulo" />
-							<ValidationMessage For="() => Libro.Titulo"> </ValidationMessage>
-						</div>
-					</div>
-
-					<div class="row">
-						<div class="col-12 col-md-3 mb-3">
-							<label class="col-form-label"> <strong> Autor: </strong></label>
-							<InputText class="form-control" @bind-Value="Libro.Autor" />
-							<ValidationMessage For="() => Libro.Autor"> </ValidationMessage>
-						</div>
-					</div>
-
-					<div class="row">
-						<div class="col-12 col-md-3 mb-3">
-							<label class="col-form-label"> <strong> Año de Publicación: </strong></label>
-							<InputNumber class="form-control" @bind-Value="Libro.AnoPublicacion" />
-							<ValidationMessage For="() => Libro.AnoPublicacion"> </ValidationMessage>
-						</div>
-					</div>
-
-					<div class="card-footer d-flex justify-content-center gap-2 bg-white">
-						<button type="submit" class="btn btn-primary bi bi-floppy"> Guardar </button>
-						<button type="button" class="btn btn-danger bi bi-trash" @onclick="() => mostrarModal = true"> Eliminar </button>
-						<a href="/Libros/Index" class="btn btn-secondary bi bi-arrow-left"> Regresar </a>
-					</div>
-				</EditForm>
-			</div>
-		</div>
-	</div>
-}
-
-else 
-{
-	<div class="text-center"> Cargando datos del libro...</div>
-}
-
-@if(mostrarModal)
-{
-	<div class="modal d-block" role="dialog" tabindex="-1" style="background: rgba(0,0,0,0.5)">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title mx-auto"> <strong> Confirmar Eliminacion </strong></h5>
-				</div>
-
-				<div class="modal-body">
-					<label class="col-12"> <strong> Datos Libro </strong></label>
-					<label class="col-12"> <strong> LibroId: </strong> @Libro.LibroId</label>
-					<label class="col-12"> <strong> Título: </strong> @Libro.Titulo</label>
-					<label class="col-12"> <strong> Autor: </strong> @Libro.Autor</label>
-					<label class="col-12"> <strong> Año de Publicación: </strong> @Libro.AnoPublicacion</label>
-					<label class="text-danger"> Esta seguro que desea eliminar este libro? </label>
-				</div>
-
-				<div class="modal-footer gap-2 bg-white d-flex justify-content-center">
-					<button type="button" class="btn btn-danger bi bi-trash" @onclick="EliminarLibro"> Si, deseo eliminar </button>
-					<button type="button" class="btn btn-secondary bi bi-arrow-left" @onclick="() => mostrarModal = false"> Regresar </button>
-				</div>
-			</div>
-		</div>
-	</div>
+                <div class="modal-footer d-flex justify-content-center gap-2">
+                    <button type="button" class="btn btn-danger bi bi-trash" @onclick="EliminarLibro"> Si, deseo eliminar </button>
+                    <button type="button" class="btn btn-secondary bi bi-arrow-left" @onclick="() => MostrarModal = false"> Regresar </button>
+                </div>
+            </div>
+        </div>
+    </div>
 }
 
 @code {
-	[Parameter]
-	public int LibroId { get; set; }
+    [Parameter]
+    public int LibroId { get; set; }
 
-	public Libros? Libro { get; set; }
+    public Libros Libro { get; set; } = new();
 
-	public bool mostrarModal { get; set; } = false;
+    private bool MostrarModal { get; set; } = false;
 
-	protected override async Task OnInitializedAsync()
-	{
-		Libro = await librosService.Buscar(LibroId);
-	}
+    private string MensajeError { get; set; } = string.Empty;
 
-	public async Task GuardarLibro()
-	{
-		if (Libro != null)
-		{
-			if (await librosService.Guardar(Libro))
-			{
-				navigationManager.NavigateTo("/Libros/Index");
-			}
-		}
-	}
+    protected override async Task OnInitializedAsync()
+    {
+        Libro = await librosService.Buscar(LibroId);
+    }
 
-	public async Task EliminarLibro()
-	{
-		if (Libro != null)
-		{
-			if (await librosService.Eliminar(LibroId))
-			{
-				navigationManager.NavigateTo("/Libros/Index");
-			}
-		}
-	}
+    public async Task GuardarLibro()
+    {
+        if (await librosService.Guardar(Libro))
+        {
+            navigation.NavigateTo("/Libros/Index");
+        }
+    }
+
+    public async Task EliminarLibro()
+    {
+        if (await librosService.Eliminar(LibroId))
+        {
+            navigation.NavigateTo("/Libros/Index");
+        }
+    }
 }
