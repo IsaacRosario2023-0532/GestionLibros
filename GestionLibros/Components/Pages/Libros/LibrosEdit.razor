@@ -1,124 +1,128 @@
-﻿@page "/Libros/Index"
+﻿@page "/Libros/Edit/{LibroId:int}"
 @inject LibrosService librosService
 @inject NavigationManager navigationManager
 @rendermode InteractiveServer
 
-<PageTitle> Index </PageTitle>
+<PageTitle> Edit </PageTitle>
 
-<div class="container mt-2">
-	<div class="card shadow-lg">
-		<div class="card-header">
-			<h5 class="card-title text-center"><strong> Consulta Libros </strong></h5>
-
-			<div class="d-flex justify-content-end">
-				<a href="/Libros/Create" class="btn btn-primary bi bi-plus-square"> Crear </a>
+@if(Libro != null)
+{
+	<div class="container mt-3">
+		<div class="card shadow-lg">
+			<div class="card-header">
+				<h5 class="card-title text-center"> <strong> Editar Libro </strong> </h5>
 			</div>
-		</div>
 
-		<div class="card-body">
-			<div class="row align-items-center">
-				<div class="col-12 col-md-3 mb-3">
-					<label class="col-form-label"> <strong> Filtrar por: </strong></label>
-					<InputSelect class="form-select" @bind-Value="filtro"> 
-						<option value="" selected disabled> Elija una opcion </option>
-						<option value="LibroId"> Libro Id </option>
-						<option value="Titulo"> Título </option>
-						<option value="Autor"> Autor </option>
-						<option value="AnoPublicacion"> Año de Publicación </option>
-					</InputSelect>
-				</div>
+			<div class="card-body">
+				<EditForm Model="Libro" OnValidSubmit="GuardarLibro">
+					<DataAnnotationsValidator />
 
-				<div class="col-12 col-md-3 mb-3">
-					<label class="col-form-label"> <strong> Busqueda: </strong></label>
-					<div class="input-group">
-						<input class="form-control" @bind="valorFiltro" placeholder="Buscar" />
-						<button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"> Buscar </button>
+					<div class="row">
+						<div class="col-12 col-md-3 mb-3">
+							<label class="col-form-label"> <strong> Libro Id: </strong></label>
+							<InputNumber class="form-control" @bind-Value="Libro.LibroId" disabled />
+						</div>
 					</div>
-				</div>
+
+					<div class="row">
+						<div class="col-12 col-md-3 mb-3">
+							<label class="col-form-label"> <strong> Título: </strong></label>
+							<InputText class="form-control" @bind-Value="Libro.Titulo" />
+							<ValidationMessage For="() => Libro.Titulo"> </ValidationMessage>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-12 col-md-3 mb-3">
+							<label class="col-form-label"> <strong> Autor: </strong></label>
+							<InputText class="form-control" @bind-Value="Libro.Autor" />
+							<ValidationMessage For="() => Libro.Autor"> </ValidationMessage>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-12 col-md-3 mb-3">
+							<label class="col-form-label"> <strong> Año de Publicación: </strong></label>
+							<InputNumber class="form-control" @bind-Value="Libro.AnoPublicacion" />
+							<ValidationMessage For="() => Libro.AnoPublicacion"> </ValidationMessage>
+						</div>
+					</div>
+
+					<div class="card-footer d-flex justify-content-center gap-2 bg-white">
+						<button type="submit" class="btn btn-primary bi bi-floppy"> Guardar </button>
+						<button type="button" class="btn btn-danger bi bi-trash" @onclick="() => mostrarModal = true"> Eliminar </button>
+						<a href="/Libros/Index" class="btn btn-secondary bi bi-arrow-left"> Regresar </a>
+					</div>
+				</EditForm>
 			</div>
-
-			<div class="table-responsive">
-				<table class="table table-hover text-center">
-					<thead class="table table-striped">
-						<tr> 
-							<th> Libro Id </th>
-							<th> Título </th>
-							<th> Autor </th>
-							<th> Año de Publicación </th>
-							<th> Opciones </th>
-						</tr>
-					</thead>
-
-					<tbody>
-						@if(ListaLibros.Count == 0)
-						{
-							<tr>
-								<td colspan="5"> No se han encontrado libros </td>
-							</tr>
-						}
-
-						@foreach(var libro in ListaLibros)
-						{
-							<tr>
-								<td> @libro.LibroId </td>
-								<td> @libro.Titulo </td>
-								<td> @libro.Autor </td>
-								<td> @libro.AnoPublicacion </td>
-								<td> 
-									<a href="/Libros/Edit/@libro.LibroId" class="btn btn-outline-info bi bi-pencil-square"> </a>
-								</td>
-							</tr>
-						}
-					</tbody>
-				</table>
-			</div>
-		</div>
-
-		<div class="card-footer d-flex justify-content-center bg-white">
-			<label> <strong> Total libros: </strong> @ListaLibros.Count </label>
 		</div>
 	</div>
-</div>
+}
+
+else 
+{
+	<div class="text-center"> Cargando datos del libro...</div>
+}
+
+@if(mostrarModal)
+{
+	<div class="modal d-block" role="dialog" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title mx-auto"> <strong> Confirmar Eliminacion </strong></h5>
+				</div>
+
+				<div class="modal-body">
+					<label class="col-12"> <strong> Datos Libro </strong></label>
+					<label class="col-12"> <strong> LibroId: </strong> @Libro.LibroId</label>
+					<label class="col-12"> <strong> Título: </strong> @Libro.Titulo</label>
+					<label class="col-12"> <strong> Autor: </strong> @Libro.Autor</label>
+					<label class="col-12"> <strong> Año de Publicación: </strong> @Libro.AnoPublicacion</label>
+					<label class="text-danger"> Esta seguro que desea eliminar este libro? </label>
+				</div>
+
+				<div class="modal-footer gap-2 bg-white d-flex justify-content-center">
+					<button type="button" class="btn btn-danger bi bi-trash" @onclick="EliminarLibro"> Si, deseo eliminar </button>
+					<button type="button" class="btn btn-secondary bi bi-arrow-left" @onclick="() => mostrarModal = false"> Regresar </button>
+				</div>
+			</div>
+		</div>
+	</div>
+}
 
 @code {
-	public string filtro { get; set; } = null!;
+	[Parameter]
+	public int LibroId { get; set; }
 
-	public string valorFiltro { get; set; } = string.Empty;
+	public Libros? Libro { get; set; }
 
-	public List<Libros> ListaLibros = new List<Libros>();
+	public bool mostrarModal { get; set; } = false;
 
 	protected override async Task OnInitializedAsync()
 	{
-		await Buscar();
+		Libro = await librosService.Buscar(LibroId);
 	}
 
-	public async Task Buscar()
+	public async Task GuardarLibro()
 	{
-		var lista = await librosService.Listar(e => true);
-
-		if (!string.IsNullOrEmpty(valorFiltro))
+		if (Libro != null)
 		{
-			if (filtro == nameof(Libros.LibroId) && int.TryParse(valorFiltro, out int id))
+			if (await librosService.Guardar(Libro))
 			{
-				lista = lista.Where(a => a.LibroId == id).ToList();
-			}
-
-			else if (filtro == nameof(Libros.Titulo))
-			{
-				lista = lista.Where(a => a.Titulo != null && a.Titulo.Contains(valorFiltro, StringComparison.OrdinalIgnoreCase)).ToList();
-			}
-
-			else if (filtro == nameof(Libros.Autor))
-			{
-				lista = lista.Where(a => a.Autor != null && a.Autor.Contains(valorFiltro, StringComparison.OrdinalIgnoreCase)).ToList();
-			}
-
-			else if (filtro == nameof(Libros.AnoPublicacion) && int.TryParse(valorFiltro, out int anio))
-			{
-				lista = lista.Where(a => a.AnoPublicacion == anio).ToList();
+				navigationManager.NavigateTo("/Libros/Index");
 			}
 		}
+	}
 
-		ListaLibros = lista;
+	public async Task EliminarLibro()
+	{
+		if (Libro != null)
+		{
+			if (await librosService.Eliminar(LibroId))
+			{
+				navigationManager.NavigateTo("/Libros/Index");
+			}
+		}
 	}
 }
