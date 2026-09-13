@@ -1,0 +1,68 @@
+﻿@page "/Libros/Create"
+@inject LibrosService librosService
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
+
+<PageTitle> Create </PageTitle>
+
+<div class="container mt-3">
+	<div class="card shadow-lg">
+		<div class="card-header">
+			<h5 class="card-title text-center"> <strong> Crear Libro </strong> </h5>
+		</div>
+
+		<div class="card-body">
+			<EditForm Model="Libro" OnValidSubmit="GuardarLibro">
+				<DataAnnotationsValidator />
+
+				<div class="row">
+					<div class="col-12 col-md-3 mb-3">
+						<label class="col-form-label"> <strong> Libro Id: </strong></label>
+						<InputNumber class="form-control" @bind-Value="Libro.LibroId" disabled />
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-12 col-md-3 mb-3">
+						<label class="col-form-label"> <strong> Título: </strong></label>
+						<InputText class="form-control" @bind-Value="Libro.Titulo" />
+						<ValidationMessage For="() => Libro.Titulo"> </ValidationMessage>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-12 col-md-3 mb-3">
+						<label class="col-form-label"> <strong> Autor: </strong></label>
+						<InputText class="form-control" @bind-Value="Libro.Autor" />
+						<ValidationMessage For="() => Libro.Autor"> </ValidationMessage>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-12 col-md-3 mb-3">
+						<label class="col-form-label"> <strong> Año de Publicación: </strong></label>
+						<InputNumber class="form-control" @bind-Value="Libro.AnoPublicacion" />
+						<ValidationMessage For="() => Libro.AnoPublicacion"> </ValidationMessage>
+					</div>
+				</div>
+
+				<div class="card-footer d-flex justify-content-center gap-2 bg-white">
+					<button type="submit" class="btn btn-primary bi bi-floppy"> Guardar </button>
+					<a href="/Libros/Index" class="btn btn-secondary bi bi-arrow-left"> Regresar </a>
+				</div>
+			</EditForm>
+		</div>
+	</div>
+</div>
+
+@code {
+	public Libros Libro = new Libros();
+
+	public async Task GuardarLibro()
+	{
+		if (await librosService.Guardar(Libro))
+		{
+			navigationManager.NavigateTo("/Libros/Index");
+		}
+	}
+}
