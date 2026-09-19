@@ -1,0 +1,88 @@
+﻿@page "/Estudiantes/Create"
+@inject EstudiantesService estudiantesService
+@inject NavigationManager navigation
+@rendermode InteractiveServer
+
+<PageTitle> Create Estudiantes </PageTitle>
+
+<div class="container mt-3">
+    <div class="card shadow-lg">
+        <div class="card-header">
+            <h5 class="card-title text-center"> <strong> Crear Estudiante </strong></h5>
+        </div>
+
+        <EditForm Model="Estudiante" OnValidSubmit="GuardarEstudiante">
+            <DataAnnotationsValidator />
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12 col-md-6 mb-3">
+                        <label class="col-form-label"> <strong> Estudiante Id </strong> </label>
+                        <InputNumber class="form-control" @bind-Value="Estudiante.EstudianteId" disabled />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-md-6 mb-3">
+                        <label class="col-form-label"> <strong> Nombre </strong> </label>
+                        <InputText class="form-control" @bind-Value="Estudiante.Nombre" />
+                        <ValidationMessage For="() => Estudiante.Nombre" />
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(MensajeError))
+                {
+                    <div class="text-danger"> @MensajeError </div>
+                }
+
+                <div class="row">
+                    <div class="col-12 col-md-6 mb-3">
+                        <label class="col-form-label"> <strong> Dirección </strong> </label>
+                        <InputText class="form-control" @bind-Value="Estudiante.Direccion" />
+                        <ValidationMessage For="() => Estudiante.Direccion" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-md-6 mb-3">
+                        <label class="col-form-label"> <strong> Email </strong> </label>
+                        <InputText class="form-control" @bind-Value="Estudiante.Email" />
+                        <ValidationMessage For="() => Estudiante.Email" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-md-6 mb-3">
+                        <label class="col-form-label"> <strong> Fecha de Nacimiento </strong> </label>
+                        <InputDate class="form-control" @bind-Value="Estudiante.FechaNacimiento" />
+                        <ValidationMessage For="() => Estudiante.FechaNacimiento" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer d-flex justify-content-center gap-2">
+                <button type="submit" class="btn btn-primary bi bi-floppy"> Guardar </button>
+                <a class="btn btn-secondary bi bi-arrow-left" href="/Estudiantes/Index"> Regresar </a>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    public Estudiantes Estudiante { get; set; } = new();
+
+    private string MensajeError { get; set; } = string.Empty;
+
+    public async Task GuardarEstudiante()
+    {
+        if (await estudiantesService.ExisteNombre(Estudiante.Nombre))
+        {
+            MensajeError = "Ya existe un estudiante con este nombre";
+            return;
+        }
+
+        if (await estudiantesService.Guardar(Estudiante))
+        {
+            navigation.NavigateTo("/Estudiantes/Index");
+        }
+    }
+}
