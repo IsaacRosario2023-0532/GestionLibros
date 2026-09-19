@@ -1,0 +1,131 @@
+﻿@page "/Estudiantes/Index"
+@inject EstudiantesService estudiantesService
+@rendermode InteractiveServer
+
+<PageTitle> Index Estudiantes </PageTitle>
+
+<div class="container mt-3">
+    <div class="card shadow-lg">
+        <div class="card-header">
+            <h5 class="card-title text-center"> <strong> Consulta Estudiantes </strong></h5>
+
+            <div class="d-flex justify-content-end">
+                <a class="btn btn-primary bi bi-plus-square" href="/Estudiantes/Create"> Crear estudiante </a>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-12 col-md-5 mb-3">
+                    <label class="col-form-label"> <strong> Filtrar por </strong></label>
+                    <InputSelect class="form-select" @bind-Value="Filtro">
+                        <option value="" disabled selected> Seleccione una opcion </option>
+                        <option value="EstudianteId"> Estudiante Id </option>
+                        <option value="Nombre"> Nombre </option>
+                        <option value="Direccion"> Dirección </option>
+                        <option value="Email"> Email </option>
+                    </InputSelect>
+                </div>
+
+                <div class="col-12 col-md-5 mb-3">
+                    <label class="col-form-label"> <strong> Busqueda </strong></label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" @bind="ValorFiltro" placeholder="Buscar" />
+                        <button type="button" class="btn btn-outline-info bi bi-search" @onclick="Buscar"> </button>
+                        <button type="button" class="btn btn-outline-secondary bi bi-arrow-clockwise" @onclick="Restablecer"> </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover text-center">
+                    <thead class="table table-striped">
+                        <tr>
+                            <th> Estudiante Id </th>
+                            <th> Nombre </th>
+                            <th> Dirección </th>
+                            <th> Email </th>
+                            <th> Fecha de Nacimiento </th>
+                            <th> Opciones </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (ListaEstudiantes.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center"> No se han encontrado estudiantes </td>
+                            </tr>
+                        }
+
+                        @foreach (var estudiante in ListaEstudiantes)
+                        {
+                            <tr>
+                                <td> @estudiante.EstudianteId </td>
+                                <td> @estudiante.Nombre </td>
+                                <td> @estudiante.Direccion </td>
+                                <td> @estudiante.Email </td>
+                                <td> @estudiante.FechaNacimiento.ToString("dd/MM/yyyy") </td>
+                                <td> <a class="btn btn-sm btn-outline-info bi bi-pencil" href="/Estudiantes/Edit/@estudiante.EstudianteId" /> </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card-footer">
+            <label class="col-form-label"> <strong> Total estudiantes: </strong> @ListaEstudiantes.Count </label>
+        </div>
+    </div>
+</div>
+
+@code {
+    public string Filtro { get; set; } = string.Empty;
+
+    public string ValorFiltro { get; set; } = string.Empty;
+
+    public List<Estudiantes> ListaEstudiantes = new List<Estudiantes>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Buscar();
+    }
+
+    public async Task Buscar()
+    {
+        var lista = await estudiantesService.Listar(e => true);
+
+        if (!string.IsNullOrEmpty(ValorFiltro))
+        {
+            if (Filtro == nameof(Estudiantes.EstudianteId) && int.TryParse(ValorFiltro, out int id))
+            {
+                lista = lista.Where(e => e.EstudianteId == id).ToList();
+            }
+
+            else if (Filtro == nameof(Estudiantes.Nombre))
+            {
+                lista = lista.Where(e => e.Nombre.Contains(ValorFiltro, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            else if (Filtro == nameof(Estudiantes.Direccion))
+            {
+                lista = lista.Where(e => e.Direccion.Contains(ValorFiltro, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            else if (Filtro == nameof(Estudiantes.Email))
+            {
+                lista = lista.Where(e => e.Email.Contains(ValorFiltro, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+        }
+
+        ListaEstudiantes = lista;
+    }
+
+    private async Task Restablecer()
+    {
+        ListaEstudiantes = await estudiantesService.Listar(e => true);
+        Filtro = string.Empty;
+        ValorFiltro = string.Empty;
+    }
+}
