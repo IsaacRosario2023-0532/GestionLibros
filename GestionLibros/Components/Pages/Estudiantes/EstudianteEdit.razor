@@ -1,0 +1,134 @@
+﻿@page "/Estudiantes/Edit/{EstudianteId:int}"
+@inject EstudiantesService estudiantesService
+@inject NavigationManager navigation
+@rendermode InteractiveServer
+
+<PageTitle> Edit Estudiantes </PageTitle>
+
+<div class="container mt-3">
+    <div class="card shadow-lg">
+        <div class="card-header">
+            <h5 class="card-title text-center"> <strong> Editar Estudiante </strong></h5>
+        </div>
+
+        <EditForm Model="Estudiante" OnValidSubmit="GuardarEstudiante">
+            <DataAnnotationsValidator />
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12 col-md-6 mb-3">
+                        <label class="col-form-label"> <strong> Estudiante Id </strong> </label>
+                        <InputNumber class="form-control" @bind-Value="Estudiante.EstudianteId" disabled />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-md-6 mb-3">
+                        <label class="col-form-label"> <strong> Nombre </strong> </label>
+                        <InputText class="form-control" @bind-Value="Estudiante.Nombre" />
+                        <ValidationMessage For="() => Estudiante.Nombre" />
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(MensajeError))
+                {
+                    <div class="text-danger"> @MensajeError </div>
+                }
+
+                <div class="row">
+                    <div class="col-12 col-md-6 mb-3">
+                        <label class="col-form-label"> <strong> Dirección </strong> </label>
+                        <InputText class="form-control" @bind-Value="Estudiante.Direccion" />
+                        <ValidationMessage For="() => Estudiante.Direccion" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-md-6 mb-3">
+                        <label class="col-form-label"> <strong> Email </strong> </label>
+                        <InputText class="form-control" @bind-Value="Estudiante.Email" />
+                        <ValidationMessage For="() => Estudiante.Email" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-md-6 mb-3">
+                        <label class="col-form-label"> <strong> Fecha de Nacimiento </strong> </label>
+                        <InputDate class="form-control" @bind-Value="Estudiante.FechaNacimiento" />
+                        <ValidationMessage For="() => Estudiante.FechaNacimiento" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer d-flex justify-content-center gap-2">
+                <button type="submit" class="btn btn-primary bi bi-floppy"> Guardar </button>
+                <button type="button" class="btn btn-danger bi bi-trash" @onclick="() => MostrarModal = true"> Eliminar </button>
+                <a class="btn btn-secondary bi bi-arrow-left" href="/Estudiantes/Index"> Regresar </a>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@if (MostrarModal)
+{
+    <div class="modal d-block" role="dialog" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title mx-auto"> <strong> Eliminar estudiante </strong> </h5>
+                </div>
+
+                <div class="modal-body">
+                    <label class="col-12"> <strong> Estudiante Id: </strong> @Estudiante.EstudianteId</label>
+                    <label class="col-12"> <strong> Nombre: </strong> @Estudiante.Nombre</label>
+                    <label class="col-12"> <strong> Dirección: </strong> @Estudiante.Direccion</label>
+                    <label class="col-12"> <strong> Email: </strong> @Estudiante.Email</label>
+                    <label class="col-12"> <strong> Fecha de Nacimiento: </strong> @Estudiante.FechaNacimiento.ToString("dd/MM/yyyy")</label>
+                    <label class="text-danger"> Esta seguro que desea eliminar este estudiante? </label>
+                </div>
+
+                <div class="modal-footer d-flex justify-content-center gap-2">
+                    <button type="button" class="btn btn-danger bi bi-trash" @onclick="EliminarEstudiante"> Si, deseo eliminar </button>
+                    <button type="button" class="btn btn-secondary bi bi-arrow-left" @onclick="() => MostrarModal = false"> Regresar </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int EstudianteId { get; set; }
+
+    public Estudiantes Estudiante { get; set; } = new();
+
+    private bool MostrarModal { get; set; } = false;
+
+    private string MensajeError { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Estudiante = await estudiantesService.Buscar(EstudianteId);
+    }
+
+    public async Task GuardarEstudiante()
+    {
+        if (await estudiantesService.ExisteNombre(Estudiante.Nombre, Estudiante.EstudianteId))
+        {
+            MensajeError = "Ya existe un estudiante con este nombre";
+            return;
+        }
+
+        if (await estudiantesService.Guardar(Estudiante))
+        {
+            navigation.NavigateTo("/Estudiantes/Index");
+        }
+    }
+
+    public async Task EliminarEstudiante()
+    {
+        if (await estudiantesService.Eliminar(EstudianteId))
+        {
+            navigation.NavigateTo("/Estudiantes/Index");
+        }
+    }
+}
