@@ -16,6 +16,7 @@ builder.Services.AddDbContextFactory<Contexto>(o =>o.UseSqlite(ConStr));
 //Service 
 builder.Services.AddScoped<LibrosService>();
 builder.Services.AddScoped<EstudiantesService>();
+builder.Services.AddScoped<PrestamosService>();
 
 var app = builder.Build();
 
