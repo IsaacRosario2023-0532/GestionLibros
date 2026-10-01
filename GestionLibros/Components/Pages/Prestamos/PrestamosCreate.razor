@@ -1,0 +1,103 @@
+﻿@page "/Prestamos/Create"
+@inject PrestamosService prestamosService
+@inject LibrosService librosService
+@inject EstudiantesService estudiantesService
+@inject NavigationManager navigation
+@rendermode InteractiveServer
+
+<PageTitle> Create Prestamos </PageTitle>
+
+<div class="container mt-3">
+    <div class="card shadow-lg">
+        <div class="card-header">
+            <h5 class="card-title text-center"> <strong> Crear Préstamo </strong></h5>
+        </div>
+
+        <EditForm Model="Prestamo" OnValidSubmit="GuardarPrestamo">
+            <DataAnnotationsValidator />
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12 col-md-6 mb-3">
+                        <label class="col-form-label"> <strong> Préstamo Id </strong> </label>
+                        <InputNumber class="form-control" @bind-Value="Prestamo.PrestamoId" disabled />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-md-6 mb-3">
+                        <label class="col-form-label"> <strong> Libro </strong> </label>
+                        <InputSelect class="form-select" @bind-Value="Prestamo.LibroId">
+                            <option value="0" disabled selected> Seleccione un libro </option>
+                            @foreach (var libro in ListaLibros)
+                            {
+                                <option value="@libro.LibroId"> @libro.Titulo </option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="() => Prestamo.LibroId" />
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(MensajeError))
+                {
+                    <div class="text-danger"> @MensajeError </div>
+                }
+
+                <div class="row">
+                    <div class="col-12 col-md-6 mb-3">
+                        <label class="col-form-label"> <strong> Estudiante </strong> </label>
+                        <InputSelect class="form-select" @bind-Value="Prestamo.EstudianteId">
+                            <option value="0" disabled selected> Seleccione un estudiante </option>
+                            @foreach (var estudiante in ListaEstudiantes)
+                            {
+                                <option value="@estudiante.EstudianteId"> @estudiante.Nombre </option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="() => Prestamo.EstudianteId" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-md-6 mb-3">
+                        <label class="col-form-label"> <strong> Fecha de Préstamo </strong> </label>
+                        <InputDate class="form-control" @bind-Value="Prestamo.FechaPrestamo" />
+                        <ValidationMessage For="() => Prestamo.FechaPrestamo" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer d-flex justify-content-center gap-2">
+                <button type="submit" class="btn btn-primary bi bi-floppy"> Guardar </button>
+                <a class="btn btn-secondary bi bi-arrow-left" href="/Prestamos/Index"> Regresar </a>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    public Prestamos Prestamo { get; set; } = new();
+
+    public List<Libros> ListaLibros = new();
+    public List<Estudiantes> ListaEstudiantes = new();
+
+    private string MensajeError { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListaLibros = await librosService.Listar(l => true);
+        ListaEstudiantes = await estudiantesService.Listar(e => true);
+    }
+
+    public async Task GuardarPrestamo()
+    {
+        if (await prestamosService.LibroPrestado(Prestamo.LibroId))
+        {
+            MensajeError = "Este libro ya está prestado y no ha sido devuelto";
+            return;
+        }
+
+        if (await prestamosService.Guardar(Prestamo))
+        {
+            navigation.NavigateTo("/Prestamos/Index");
+        }
+    }
+}

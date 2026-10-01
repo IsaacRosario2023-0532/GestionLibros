@@ -1,0 +1,79 @@
+﻿@page "/Prestamos/Index"
+@inject PrestamosService prestamosService
+@rendermode InteractiveServer
+
+<PageTitle> Index Prestamos </PageTitle>
+
+<div class="container mt-3">
+    <div class="card shadow-lg">
+        <div class="card-header">
+            <h5 class="card-title text-center"> <strong> Consulta Préstamos </strong></h5>
+
+            <div class="d-flex justify-content-end">
+                <a class="btn btn-primary bi bi-plus-square" href="/Prestamos/Create"> Crear préstamo </a>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover text-center">
+                    <thead class="table table-striped">
+                        <tr>
+                            <th> Préstamo Id </th>
+                            <th> Libro </th>
+                            <th> Estudiante </th>
+                            <th> Fecha Préstamo </th>
+                            <th> Fecha Devolución </th>
+                            <th> Estado </th>
+                            <th> Opciones </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (ListaPrestamos.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center"> No se han encontrado préstamos </td>
+                            </tr>
+                        }
+
+                        @foreach (var prestamo in ListaPrestamos)
+                        {
+                            <tr>
+                                <td> @prestamo.PrestamoId </td>
+                                <td> @prestamo.Libro?.Titulo </td>
+                                <td> @prestamo.Estudiante?.Nombre </td>
+                                <td> @prestamo.FechaPrestamo.ToString("dd/MM/yyyy") </td>
+                                <td> @(prestamo.FechaDevolucion?.ToString("dd/MM/yyyy") ?? "-") </td>
+                                <td>
+                                    @if (prestamo.FechaDevolucion == null)
+                                    {
+                                        <span class="badge bg-warning text-dark"> Prestado </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success"> Devuelto </span>
+                                    }
+                                </td>
+                                <td> <a class="btn btn-sm btn-outline-info bi bi-pencil" href="/Prestamos/Edit/@prestamo.PrestamoId" /> </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card-footer">
+            <label class="col-form-label"> <strong> Total préstamos: </strong> @ListaPrestamos.Count </label>
+        </div>
+    </div>
+</div>
+
+@code {
+    public List<Prestamos> ListaPrestamos = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListaPrestamos = await prestamosService.Listar(p => true);
+    }
+}
