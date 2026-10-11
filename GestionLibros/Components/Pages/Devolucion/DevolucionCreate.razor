@@ -1,0 +1,74 @@
+﻿@page "/Devoluciones/Create"
+@inject IDevolucionesService devolucionesService
+@inject NavigationManager navigation
+@rendermode InteractiveServer
+
+<PageTitle> Devolución de Libros </PageTitle>
+
+<div class="container mt-3">
+    <div class="card shadow-lg">
+        <div class="card-header">
+            <h5 class="card-title text-center"> <strong> Devolución de Libros </strong></h5>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <div class="col-12 col-md-6 mb-3">
+                    <label class="col-form-label"> <strong> Préstamo pendiente </strong> </label>
+                    <select class="form-select" @bind="prestamoId">
+                        <option value="0"> Seleccione un préstamo </option>
+                        @foreach (var p in Pendientes)
+                        {
+                            <option value="@p.PrestamoId">
+                                #@p.PrestamoId - @p.Libro?.Titulo - @p.Estudiante?.Nombre (@p.FechaPrestamo.ToString("dd/MM/yyyy"))
+                            </option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12 col-md-6 mb-3">
+                    <label class="col-form-label"> <strong> Fecha de Devolución </strong> </label>
+                    <input type="date" class="form-control" @bind="fechaDevolucion" />
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(MensajeError))
+            {
+                <div class="text-danger"> @MensajeError </div>
+            }
+        </div>
+
+        <div class="card-footer d-flex justify-content-center gap-2">
+            <button type="button" class="btn btn-primary bi bi-floppy" @onclick="Devolver"> Guardar </button>
+            <a class="btn btn-secondary bi bi-arrow-left" href="/Prestamos/Index"> Regresar </a>
+        </div>
+    </div>
+</div>
+
+@code {
+    public List<Prestamos> Pendientes = new();
+    private int prestamoId { get; set; }
+    private DateTime fechaDevolucion { get; set; } = DateTime.Today;
+    private string MensajeError { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Pendientes = await devolucionesService.ListarPendientes();
+    }
+
+    private async Task Devolver()
+    {
+        if (prestamoId == 0)
+        {
+            MensajeError = "Debe seleccionar un préstamo";
+            return;
+        }
+
+        if (await devolucionesService.Devolver(prestamoId, fechaDevolucion))
+            navigation.NavigateTo("/Prestamos/Index");
+        else
+            MensajeError = "No se pudo registrar. La fecha de devolución no puede ser anterior a la del préstamo.";
+    }
+}

@@ -1,0 +1,86 @@
+﻿@page "/Libros/Promedio"
+@inject IDevolucionesService devolucionesService
+@rendermode InteractiveServer
+
+<PageTitle> Promedio de días prestado </PageTitle>
+
+<div class="container mt-3">
+    <div class="card shadow-lg">
+        <div class="card-header">
+            <h5 class="card-title text-center"> <strong> Libros - Promedio de días prestado </strong></h5>
+        </div>
+
+        <div class="card-body">
+            <div class="row g-2 mb-3">
+                <div class="col-md-6">
+                    <label class="col-form-label"> <strong> Título </strong> </label>
+                    <input class="form-control" @bind="filtroTitulo" />
+                </div>
+                <div class="col-md-6 d-flex align-items-end gap-1">
+                    <button class="btn btn-primary bi bi-search" @onclick="Buscar"> Buscar </button>
+                    <button class="btn btn-outline-secondary bi bi-x-circle" @onclick="Limpiar"> Limpiar </button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover text-center">
+                    <thead class="table table-striped">
+                        <tr>
+                            <th> Libro Id </th>
+                            <th> Título </th>
+                            <th> Autor </th>
+                            <th> Veces devuelto </th>
+                            <th> Promedio de días prestado </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Lista.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="5"> No se han encontrado libros </td>
+                            </tr>
+                        }
+
+                        @foreach (var l in Lista)
+                        {
+                            <tr>
+                                <td> @l.LibroId </td>
+                                <td> @l.Titulo </td>
+                                <td> @l.Autor </td>
+                                <td> @l.CantidadDevoluciones </td>
+                                <td> @l.PromedioDiasPrestado.ToString("N1") </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card-footer">
+            <label class="col-form-label"> <strong> Total libros: </strong> @Lista.Count </label>
+        </div>
+    </div>
+</div>
+
+@code {
+    public List<LibroPromedioDto> Lista = new();
+    public string? filtroTitulo { get; set; }
+
+    protected override async Task OnInitializedAsync() => await Buscar();
+
+    private async Task Buscar()
+    {
+        var lista = await devolucionesService.ListarLibrosConPromedio();
+
+        if (!string.IsNullOrWhiteSpace(filtroTitulo))
+            lista = lista.Where(l => l.Titulo.Contains(filtroTitulo, StringComparison.OrdinalIgnoreCase)).ToList();
+
+        Lista = lista;
+    }
+
+    private async Task Limpiar()
+    {
+        filtroTitulo = null;
+        await Buscar();
+    }
+}

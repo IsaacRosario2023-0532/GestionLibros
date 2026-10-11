@@ -16,4 +16,5 @@ public class Libros
     [Required(ErrorMessage = "Campo Requerido")]
     [Range(1, int.MaxValue, ErrorMessage = "Año no valido")]
     public int AnoPublicacion { get; set; }
+    public int CantidadDisponible { get; set; }
 }

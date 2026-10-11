@@ -16,7 +16,7 @@ public class Prestamos
 
     public DateTime FechaPrestamo { get; set; } = DateTime.Now;
 
-    public DateTime? FechaDevolucion { get; set; } = DateTime.Now;
+    public DateTime? FechaDevolucion { get; set; }
 
     [ForeignKey(nameof(LibroId))]
     public virtual Libros Libro { get; set; } = null!;
