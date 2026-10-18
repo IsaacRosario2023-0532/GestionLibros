@@ -18,6 +18,7 @@ builder.Services.AddScoped<LibrosService>();
 builder.Services.AddScoped<EstudiantesService>();
 builder.Services.AddScoped<PrestamosService>();
 builder.Services.AddScoped<IDevolucionesService, DevolucionesService>();
+builder.Services.AddScoped<IEntradasService, EntradasService>();
 
 var app = builder.Build();
 
