@@ -1,0 +1,202 @@
+﻿@page "/Entradas/Edit/{EntradaId:int}"
+@inject IEntradasService entradasService
+@inject LibrosService librosService
+@inject NavigationManager navigation
+@rendermode InteractiveServer
+
+<PageTitle> Edit Entradas </PageTitle>
+
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header">
+            <h5 class="card-title text-center"> <strong> Editar entrada </strong></h5>
+        </div>
+
+        @if (entrada == null)
+        {
+            <div class="card-body">
+                <div class="text-danger"> No se encontró la entrada </div>
+            </div>
+
+            <div class="card-footer d-flex justify-content-center bg-white">
+                <a href="/Entradas/Index" class="btn btn-secondary bi bi-arrow-left"> Regresar </a>
+            </div>
+        }
+        else
+        {
+            <EditForm Model="entrada" OnValidSubmit="GuardarEntrada">
+                <DataAnnotationsValidator />
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12 col-md-4 mb-3">
+                            <label class="col-form-label"> <strong> Entrada Id </strong></label>
+                            <InputNumber class="form-control" @bind-Value="entrada.EntradaId" disabled />
+                        </div>
+
+                        <div class="col-12 col-md-4 mb-3">
+                            <label class="col-form-label"> <strong> Fecha </strong></label>
+                            <InputDate class="form-control" @bind-Value="entrada.Fecha" />
+                        </div>
+
+                        <div class="col-12 col-md-4 mb-3">
+                            <label class="col-form-label"> <strong> Concepto </strong></label>
+                            <InputText class="form-control" @bind-Value="entrada.Concepto" />
+                            <ValidationMessage For="() => entrada.Concepto" />
+                        </div>
+                    </div>
+
+                    <div class="border border-success p-3 mt-3">
+                        <h5> Detalle de la entrada </h5>
+
+                        <LibroPicker LibroId="detalleSeleccionado.LibroId"
+                                     Cantidad="detalleSeleccionado.Cantidad"
+                                     ListaLibros="ListaLibros"
+                                     OnLibroSeleccionado="AgregarDetalle" />
+
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered table-light text-center">
+                                <thead>
+                                    <tr>
+                                        <th> Libro Id </th>
+                                        <th> Título </th>
+                                        <th> Cantidad </th>
+                                        <th> Opciones </th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    @if (entrada.EntradasDetalles.Count == 0)
+                                    {
+                                        <tr>
+                                            <td colspan="4"> No se han agregado libros </td>
+                                        </tr>
+                                    }
+
+                                    @foreach (var detalle in entrada.EntradasDetalles)
+                                    {
+                                        <tr>
+                                            <td> @detalle.LibroId </td>
+                                            <td> @ListaLibros.FirstOrDefault(l => l.LibroId == detalle.LibroId)?.Titulo </td>
+                                            <td> @detalle.Cantidad </td>
+                                            <td> <button type="button" class="btn btn-outline-dark bi bi-trash" @onclick="() => RemoverDetalle(detalle)"> Remover </button> </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <label class="form-label"> <strong> Conteo Registros: </strong> @entrada.EntradasDetalles.Count </label>
+                        <label class="form-label ms-4"> <strong> Total libros: </strong> @entrada.EntradasDetalles.Sum(d => d.Cantidad) </label>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(MensajeError))
+                    {
+                        <div class="text-danger mt-2"> @MensajeError </div>
+                    }
+                </div>
+
+                <div class="card-footer d-flex justify-content-center bg-white gap-2">
+                    <button type="submit" class="btn btn-primary bi bi-floppy"> Guardar </button>
+                    <button type="button" class="btn btn-danger bi bi-trash" @onclick="() => mostrarModal = true"> Eliminar </button>
+                    <a href="/Entradas/Index" class="btn btn-secondary bi bi-arrow-left"> Regresar </a>
+                </div>
+            </EditForm>
+        }
+    </div>
+</div>
+
+@if (mostrarModal && entrada != null)
+{
+    <div class="modal d-block" tabindex="-1" role="dialog" style="background:rgba(0,0,0,0.5)">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title mx-auto"> <strong> Confirmar Eliminación </strong></h5>
+                </div>
+
+                <div class="modal-body">
+                    <label class="col-12"> <strong> Entrada Id: </strong> @entrada.EntradaId</label>
+                    <label class="col-12"> <strong> Concepto: </strong> @entrada.Concepto</label>
+                    <label class="col-12"> <strong> Total libros: </strong> @entrada.EntradasDetalles.Sum(d => d.Cantidad)</label>
+                    <label class="col-12"> <strong> Fecha: </strong> @entrada.Fecha.ToShortDateString()</label>
+                    <label class="text-danger"> ¿Está seguro que desea eliminar esta entrada? Se restarán los libros del stock. </label>
+                </div>
+
+                <div class="modal-footer gap-2 d-flex justify-content-center bg-white">
+                    <button type="button" class="btn btn-danger bi bi-trash" @onclick="EliminarEntrada"> Sí, deseo eliminar </button>
+                    <button type="button" class="btn btn-secondary bi bi-arrow-left" @onclick="() => mostrarModal = false"> Regresar </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int EntradaId { get; set; }
+
+    public Entradas? entrada { get; set; }
+
+    public bool mostrarModal { get; set; } = false;
+
+    public EntradasDetalle detalleSeleccionado = new();
+
+    public List<Libros> ListaLibros = new();
+
+    private string MensajeError { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListaLibros = await librosService.Listar(l => true);
+        entrada = await entradasService.Buscar(EntradaId);
+    }
+
+    public async Task GuardarEntrada()
+    {
+        MensajeError = string.Empty;
+
+        if (entrada!.EntradasDetalles.Count == 0)
+        {
+            MensajeError = "Debe agregar al menos un libro";
+            return;
+        }
+
+        entrada.Total = entrada.EntradasDetalles.Sum(d => d.Cantidad);
+
+        if (await entradasService.Guardar(entrada))
+            navigation.NavigateTo("/Entradas/Index");
+        else
+            MensajeError = "No se pudo guardar: el stock de algún libro quedaría negativo";
+    }
+
+    public async Task EliminarEntrada()
+    {
+        if (await entradasService.Eliminar(EntradaId))
+        {
+            navigation.NavigateTo("/Entradas/Index");
+        }
+        else
+        {
+            mostrarModal = false;
+            MensajeError = "No se pudo eliminar: el stock de algún libro quedaría negativo";
+        }
+    }
+
+    public async Task AgregarDetalle((Libros libro, int cantidad) seleccion)
+    {
+        var existente = entrada!.EntradasDetalles.FirstOrDefault(d => d.LibroId == seleccion.libro.LibroId);
+
+        if (existente != null)
+            existente.Cantidad += seleccion.cantidad;
+        else
+            entrada.EntradasDetalles.Add(new EntradasDetalle(seleccion.libro.LibroId, seleccion.cantidad));
+
+        detalleSeleccionado = new EntradasDetalle();
+        await Task.CompletedTask;
+    }
+
+    public void RemoverDetalle(EntradasDetalle detalle)
+    {
+        entrada!.EntradasDetalles.Remove(detalle);
+    }
+}
