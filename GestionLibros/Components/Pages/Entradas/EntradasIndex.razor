@@ -1,0 +1,129 @@
+﻿@page "/Entradas/Index"
+@inject IEntradasService entradasService
+@rendermode InteractiveServer
+
+<PageTitle> Index Entradas </PageTitle>
+
+<div class="container mt-3">
+    <div class="card shadow-lg">
+        <div class="card-header">
+            <h5 class="card-title text-center"> <strong> Consulta entradas </strong></h5>
+
+            <div class="d-flex justify-content-end">
+                <a class="btn btn-primary bi bi-plus-square" href="/Entradas/Create"> Crear entrada </a>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-12 col-md-6 mb-3">
+                    <label class="form-label"> <strong> Desde: </strong></label>
+                    <InputDate class="form-control" @bind-Value="Desde" />
+                </div>
+
+                <div class="col-12 col-md-6 mb-3">
+                    <label class="form-label"> <strong> Hasta: </strong></label>
+                    <InputDate class="form-control" @bind-Value="Hasta" />
+                </div>
+            </div>
+
+            <div class="row align-items-center">
+                <div class="col-12 col-md-6 mb-3">
+                    <label class="form-label"> <strong> Filtrar por: </strong></label>
+                    <InputSelect @bind-Value="filtro" class="form-select">
+                        <option value="@nameof(Entradas.EntradaId)"> Entrada Id </option>
+                        <option value="@nameof(Entradas.Concepto)"> Concepto </option>
+                    </InputSelect>
+                </div>
+
+                <div class="col-12 col-md-6 mb-3">
+                    <label class="form-label"> <strong> Búsqueda: </strong></label>
+                    <div class="input-group">
+                        <input class="form-control" @bind="valorFiltro" placeholder="Buscar" />
+                        <button type="button" class="btn btn-outline-info bi bi-search" @onclick="Buscar"> Buscar </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover table-striped text-center">
+                    <thead>
+                        <tr>
+                            <th> Entrada Id </th>
+                            <th> Fecha </th>
+                            <th> Concepto </th>
+                            <th> Total libros </th>
+                            <th> Opciones </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (ListaEntradas.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="5"> No se han encontrado entradas </td>
+                            </tr>
+                        }
+
+                        @foreach (var e in ListaEntradas)
+                        {
+                            <tr>
+                                <td> @e.EntradaId </td>
+                                <td> @e.Fecha.ToShortDateString() </td>
+                                <td> @e.Concepto </td>
+                                <td> @e.EntradasDetalles.Sum(d => d.Cantidad) </td>
+                                <td> <a href="/Entradas/Edit/@e.EntradaId" class="btn btn-outline-info bi bi-pencil-square" /></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card-footer">
+            <label class="col-form-label"> <strong> Conteo Registro: </strong> @ListaEntradas.Count </label>
+            <label class="ms-5 col-form-label"> <strong> Total libros recibidos: </strong> @ListaEntradas.Sum(e => e.EntradasDetalles.Sum(d => d.Cantidad)) </label>
+        </div>
+    </div>
+</div>
+
+@code {
+    public DateTime? Desde { get; set; }
+
+    public DateTime? Hasta { get; set; }
+
+    public string filtro { get; set; } = nameof(Entradas.Concepto);
+
+    public string valorFiltro { get; set; } = string.Empty;
+
+    public List<Entradas> ListaEntradas = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Buscar();
+    }
+
+    public async Task Buscar()
+    {
+        var lista = await entradasService.Listar(e => true);
+
+        if (Desde.HasValue && Hasta.HasValue)
+        {
+            lista = lista.Where(e => e.Fecha.Date >= Desde.Value.Date && e.Fecha.Date <= Hasta.Value.Date).ToList();
+        }
+
+        if (!string.IsNullOrEmpty(valorFiltro))
+        {
+            if (filtro == nameof(Entradas.EntradaId) && int.TryParse(valorFiltro, out int id))
+            {
+                lista = lista.Where(e => e.EntradaId == id).ToList();
+            }
+            else if (filtro == nameof(Entradas.Concepto))
+            {
+                lista = lista.Where(e => e.Concepto.Contains(valorFiltro, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+        }
+
+        ListaEntradas = lista;
+    }
+}
