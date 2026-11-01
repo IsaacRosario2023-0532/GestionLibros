@@ -1,3 +1,7 @@
 <Solution>
+  <Project Path="GestionLibros.Api/GestionLibros.Api.csproj" Id="20d778ca-bec3-4eda-9719-9d11cbd348dc" />
+  <Project Path="GestionLibros.Data/GestionLibros.Data.csproj" Id="23b72ce3-74b5-46f5-9e96-bb83d2e12d2a" />
+  <Project Path="GestionLibros.Services/GestionLibros.Services.csproj" Id="9ed8fe07-47f3-4dcf-bc6c-a0dfc91b435c" />
+  <Project Path="GestionLibros.Shared/GestionLibros.Shared.csproj" Id="798136c0-6317-481b-b224-ef81dc661984" />
   <Project Path="GestionLibros/GestionLibros.csproj" />
 </Solution>
